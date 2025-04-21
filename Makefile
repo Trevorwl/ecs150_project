@@ -1,7 +1,7 @@
 CC = gcc
 
 #add -MMD and -MP to create .d files
-CFLAGS = -Wall -Werror -MMD -MP
+CFLAGS = -Wall -Werror -MMD -MP -g
 
 
 OBJDIR = obj

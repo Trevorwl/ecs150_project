@@ -25,6 +25,17 @@ struct cmd{
 
     /*The number of input arguments, includes the command*/
     int numberOfArgs;
+
+    /* pointer to next cmd */
+    struct cmd * next;
+
+    char in_file[FILE_NAME_MAX];
+    char out_file[FILE_NAME_MAX];
+    int is_background;
+
+    int isLast;
+    int isFirst;
+
 };
 
 struct cmd* cmdConstructor();
@@ -42,7 +53,7 @@ struct cmd* cmdConstructor();
  * Params: cmd->shell input
  *
  */
-void getCmd(struct cmd* cmd);
+void getCmds(struct cmd* cmd);
 
 /*
  * The shell input is tokenized and converted into

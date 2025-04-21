@@ -4,18 +4,20 @@
 #include <unistd.h>
 
 #include "cmd.h"
+#include "sshell.h"
+#include "utils.h"
 
-
-struct cmd* cmdConstructor(){
-    struct cmd* cmd = (struct cmd*)malloc(sizeof(struct cmd));
-    if(cmd==NULL){
+struct cmd *cmdConstructor() {
+    struct cmd *cmd = (struct cmd *)malloc(sizeof(struct cmd));
+    if (cmd == NULL) {
         perror("malloc failed");
         exit(1);
     }
 
-    cmd->length=-1;
-    cmd->numberOfArgs=-1;
-
+    cmd->length = -1;
+    cmd->numberOfArgs = -1;
+    cmd->isLast = 0;
+    cmd->isFirst = 0;
     return cmd;
 }
 
@@ -32,10 +34,10 @@ struct cmd* cmdConstructor(){
  * Params: cmd->shell input
  *
  */
-void getCmd(struct cmd* cmd){
-    char* input=cmd->input;
+void getCmds(struct cmd *cmd) {
+    char input[CMD_MAX_LENGTH + 1];
 
-    if (!fgets(input, CMD_MAX_LENGTH, stdin)){
+    if (!fgets(input, CMD_MAX_LENGTH, stdin)) {
         printf("\n");
         strncpy(input, "exit\n", CMD_MAX_LENGTH);
     }
@@ -45,12 +47,28 @@ void getCmd(struct cmd* cmd){
         fflush(stdout);
     }
 
-    char* endOfCmd = strchr(input, '\n');
-    if (endOfCmd){
+    char *endOfCmd = strchr(input, '\n');
+    if (endOfCmd) {
         *endOfCmd = '\0';
     }
-
-    cmd->length = strlen(input);
+    // 把所有的 管道符 | 都改成 '\0', 然后返回分割坐标数组
+    int *offsets = parseInput(input);
+    int pos = 0;
+    struct cmd *now = cmd;
+    now->isFirst = 1;
+    while (offsets[pos]!=-1) {
+        strcpy(now->input, input + offsets[pos]);
+        pos++;
+        if (offsets[pos]!=-1) {
+            struct cmd *next = cmdConstructor();
+            now->next = next;
+            now = next;
+        }else {
+            now->isLast = 1;
+            now->next = NULL;
+        }
+    }
+    free(offsets);
 }
 
 /*
@@ -62,27 +80,73 @@ void getCmd(struct cmd* cmd){
  *
  * Throws: Error if command line has too many arguments
  */
-int parseArgs(struct cmd* cmd){
-    strcpy(cmd->argString,cmd->input);
+int parseArgs(struct cmd *cmd) {
+    cmd->length = strlen(cmd->input);
+    strcpy(cmd->argString, cmd->input);
+    cmd->argString[strlen(cmd->argString)] = ' ';
+    cmd->argString[strlen(cmd->argString)+1] = '\0';
+    char **args = cmd->args;
 
-    char** args = cmd->args;
 
-    char* token = strtok(cmd->argString," ");
-    int count = 0;
-
-    while(token!=NULL && count < MAX_ARG_LENGTH){
-        args[count++]=token;
-        token=strtok(NULL," ");
+    // detect > <
+    char* outputRedirect = strchr(cmd->argString, '>');
+    if (outputRedirect) {
+        *outputRedirect = ' ';
+        if(cmd->isLast==0) {
+            fprintf(stderr, "Error: mislocated output redirection\n");
+            fflush(stderr);
+        }
+        // find output file
+        char * ptr = outputRedirect+1;
+        if(ptr && *ptr==' ') ptr++;
+        char * ptr_n = strchr(ptr, ' ');
+        if (ptr_n==NULL) {
+            fprintf(stderr, "Error: no output file\n");
+            fflush(stderr);
+        }else {
+            // copy file name
+            *ptr_n = '\0';
+            strcpy(cmd->out_file, ptr);
+            *(ptr-1) = '\0';
+        }
+    }
+    char* inputRedirect = strchr(cmd->argString, '<');
+    if(inputRedirect) {
+        *inputRedirect = ' ';
+        if(cmd->isFirst==0) {
+            fprintf(stderr, "Error: mislocated input redirection\n");
+            fflush(stderr);
+        }
+        // find input file
+        char * ptr = inputRedirect+1;
+        if(ptr && *ptr==' ') ptr++;
+        char * ptr_n = strchr(ptr, ' ');
+        if (ptr_n==NULL) {
+            fprintf(stderr, "Error: no input file\n");
+            fflush(stderr);
+        }else {
+            // copy file name
+            *ptr_n = '\0';
+            strcpy(cmd->in_file, ptr);
+            *(ptr-1) = '\0';
+        }
     }
 
-    if(token!=NULL){
+    char *token = strtok(cmd->argString, " ");
+    int count = 0;
+
+    while (token != NULL && count < MAX_ARG_LENGTH) {
+        args[count++] = token;
+        token = strtok(NULL, " ");
+    }
+
+    if (token != NULL) {
         fprintf(stderr, "Error: too many process arguments\n");
         return 0;
     }
 
-    args[count]=NULL;
+    args[count] = NULL;
     cmd->numberOfArgs = count - 1;
 
     return 1;
 }
-

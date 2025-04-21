@@ -7,5 +7,5 @@
  * Returns: 1 if string is whitespace, 0 otherwise
  */
 int isWhiteSpace(const char* str);
-
+int* parseInput(char*);
 #endif

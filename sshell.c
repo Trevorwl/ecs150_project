@@ -74,8 +74,8 @@ int main(void) {
         printf("sshell@ucd$ ");
         fflush(stdout);
 
-        getCmd(cmd);
-
+        getCmds(cmd);
+        // right now , cmd just the head of cmdline
         if (!strcmp(cmd->input, "exit")) {
             fprintf(stderr, "Bye...\n");
             fprintf(stderr,"+ completed 'exit' [0]\n");
@@ -89,6 +89,15 @@ int main(void) {
         if(!parseArgs(cmd)){
             continue;
         }
+
+        // 看看cmd的值
+        struct cmd* head = cmd;
+        while(head) {
+            printf("%s ", head->input);
+            head = head->next;
+        }
+        printf("\n");
+        fflush(stdout);
 
         int returnVal = doFork(cmd);
 
