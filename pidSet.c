@@ -5,6 +5,7 @@
 #include "sshell.h"
 #include "pidSet.h"
 #include <string.h>
+#include <sys/types.h>
 #include <stdio.h>
 #include <fcntl.h>
 

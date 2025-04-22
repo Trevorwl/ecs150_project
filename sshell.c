@@ -84,7 +84,7 @@ void checkTasks(struct pidSet* pidSet){
     int numberOfTasks=pidSet->numberOfPids;
     pidSet->tasksAreDone=true;
 
-    if(!(pidSet->isBackGroundTasks)){
+    if(pidSet->isBackGroundTasks==false){
         for(int i = 0; i < numberOfTasks; i++){
             int ret;
 
@@ -130,14 +130,13 @@ struct pidSet* runTasks(struct cmd* cmd){
     bool is_background = false;
 
     do{
+        numberofTasks++;
 
-        if(currentCmd->is_background==1){
+        if(currentCmd->is_background == 1){
             is_background = true;
         }
 
-        numberofTasks++;
-
-        currentCmd=currentCmd->next;
+        currentCmd = currentCmd->next;
 
     } while(currentCmd!=NULL);
 
@@ -177,23 +176,29 @@ struct pidSet* runTasks(struct cmd* cmd){
 
          if(pid==0){
              if(i > 0){
-                 dup2(pipes[i-1][0],STDIN_FILENO);
+                 if(dup2(pipes[i-1][0],STDIN_FILENO)==-1){
+                     perror("dup2");
+                     exit(EXIT_FAILURE);
+                 }
              }
 
              if(i < numberofTasks-1){
-                 dup2(pipes[i][1],STDOUT_FILENO);
-             }
+                 if(dup2(pipes[i][1],STDOUT_FILENO)==-1){
+                     perror("dup2");
+                     exit(EXIT_FAILURE);
+                 }
+             }S
 
              if(currentCmd->hasOutput){
                  int outFD = open(
-                           currentCmd->in_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                           currentCmd->out_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                  dup2(outFD,STDOUT_FILENO);
                  close(outFD);
              }
 
              if(currentCmd->hasInput){
                 int inFD = open(
-                          currentCmd->out_file, O_RDONLY);
+                          currentCmd->in_file, O_RDONLY);
                 dup2(inFD,STDIN_FILENO);
                 close(inFD);
             }
@@ -203,11 +208,13 @@ struct pidSet* runTasks(struct cmd* cmd){
                  close(pipes[j][1]);
              }
 
-             execvp(cmd->args[0],cmd->args);
+             execvp(currentCmd->args[0],currentCmd->args);
              fprintf(stderr, "Error: command not found\n");
              fflush(stderr);
              exit(EXIT_FAILURE);
          }
+
+         currentCmd = currentCmd->next;
      }
 
      for(int i = 0; i < numberOfPipes; i++){
@@ -271,18 +278,18 @@ int main(void) {
         printf("sshell@ucd$ ");
         fflush(stdout);
 
-        bool goodInput = getCmds(cmd);
+        bool parsingErrors = (getCmds(cmd)==0);
 
         bool whiteSpace = strlen(commandLine) == 0 || isWhiteSpace(commandLine);
 
-        if(whiteSpace == false && goodInput == true){
+        if(whiteSpace == false && parsingErrors  == false){
 
             struct cmd* currentCmd = cmd;
 
             do{
 
                 if(parseArgs(cmd)==0){
-                   goodInput=false;
+                   parsingErrors = true;
                    break;
                 }
 
@@ -292,7 +299,7 @@ int main(void) {
 
         }
 
-        if(goodInput == false){
+        if(parsingErrors == true){
            continue;
         }
 
@@ -328,7 +335,7 @@ int main(void) {
                  || !strcmp(firstProgram,"exit"))){
             builtInStatus=doBuiltinTask(cmd);
 
-               fprintf(stderr, "+ completed '%s' [%d]\n", commandLine, builtInStatus);
+            fprintf(stderr, "+ completed '%s' [%d]\n", commandLine, builtInStatus);
         }
 
         printFinishedBackgroundTasks();

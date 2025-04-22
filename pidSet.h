@@ -2,6 +2,7 @@
 #define PID_SET
 
 #include <stdbool.h>
+#include <sys/types.h>
 
 #include "sshell.h"
 #include "cmd.h"
