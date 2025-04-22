@@ -281,7 +281,9 @@ int main(void) {
     struct cmd* cmd = cmdConstructor();
 
     while (1) {
-        resetCmd(cmd);
+        cmdDestructor(cmd);
+        cmd=cmdConstructor();
+//        resetCmd(cmd);
 
         printf("sshell@ucd$ ");
         fflush(stdout);
@@ -325,10 +327,8 @@ int main(void) {
             taskPids = runTasks(cmd);
 
             if(taskPids->isBackGroundTasks == false){
-               checkTasks(taskPids);
-               printExecutionResult(taskPids);
-               pidSetDestructor(taskPids);
-           }
+                checkTasks(taskPids);
+            }
         }
 
         for(int i = 0;i < backgroundTasks->length; i++){
@@ -342,18 +342,33 @@ int main(void) {
                  || !strcmp(firstProgram,"cd")
                  || !strcmp(firstProgram,"exit"))){
             builtInStatus=doBuiltinTask(cmd);
-
-            fprintf(stderr, "+ completed '%s' [%d]\n", commandLine, builtInStatus);
         }
 
         printFinishedBackgroundTasks();
         removeFinishedBackgroundTasks();
 
+        if(whiteSpace==false && (!strcmp(firstProgram,"pwd")
+                        || !strcmp(firstProgram,"cd")
+                        || !strcmp(firstProgram,"exit"))){
+
+            fprintf(stderr, "+ completed '%s' [%d]\n", commandLine, builtInStatus);
+        }
+
+        if(whiteSpace==false && strcmp(firstProgram,"pwd") != 0
+                        && strcmp(firstProgram,"cd") != 0
+                        && strcmp(firstProgram,"exit") != 0){
+
+            if(taskPids->isBackGroundTasks == false){
+               printExecutionResult(taskPids);
+               pidSetDestructor(taskPids);
+               taskPids=NULL;
+           }
+        }
+
         if(whiteSpace==false && !strcmp(firstProgram,"exit")
                 && builtInStatus!=EXIT_FAILURE){
             if(taskPids!=NULL){
                  pidSetDestructor(taskPids);
-
              }
              break;
         }

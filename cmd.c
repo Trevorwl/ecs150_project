@@ -45,29 +45,37 @@ void resetCmd(struct cmd* cmd){
     currentCmd = cmd;
 
     for(int i = 0; i < numberOfcmds; i++){
-        allCmds[i]=currentCmd;
-        currentCmd=currentCmd->next;
+        allCmds[i] = currentCmd;
+        currentCmd = currentCmd->next;
     }
 
-    for(int i = numberOfcmds-1; i >= 1; i--){
-        if(allCmds[i]->next!=NULL){
-            allCmds[i]->next=NULL;
-        }
-
+    // Free additional commands beyond the first one
+    for(int i = numberOfcmds - 1; i >= 1; i--){
+        allCmds[i]->next = NULL;
         free(allCmds[i]);
     }
-
-    cmd->length = 0;
-    cmd->numberOfArgs = 0;
-    cmd->isLast = 0;
-    cmd->isFirst = 0;
-
-    cmd->next=NULL;
-
-    cmd->is_background=0;
-
-    cmd->hasOutput=0;
-    cmd->hasInput=0;
+//
+//    // Explicitly reset the main cmd struct clearly and completely
+//    memset(cmd->input, 0, CMD_MAX_LENGTH);
+//    cmd->length = 0;
+//
+//    memset(cmd->argString, 0, CMD_MAX_LENGTH + 1);
+//    for(int i = 0; i < MAX_ARG_LENGTH + 1; i++){
+//        cmd->args[i] = NULL;
+//    }
+//    cmd->numberOfArgs = 0;
+//
+//    cmd->next = NULL;
+//
+//    memset(cmd->in_file, 0, FILE_NAME_MAX);
+//    memset(cmd->out_file, 0, FILE_NAME_MAX);
+//
+//    cmd->is_background = 0;
+//    cmd->hasOutput = 0;
+//    cmd->hasInput = 0;
+//
+//    cmd->isLast = 0;
+//    cmd->isFirst = 0;
 }
 
 void cmdDestructor(struct cmd* cmd){
@@ -171,9 +179,9 @@ int parseArgs(struct cmd *cmd) {
     //  detect background '&'
     {
         char *bg = strchr(cmd->argString, '&');
+//        printf("##%s##\n",cmd->argString);
 
         if(bg && cmd->isLast ==0){
-            fprintf(stderr, "Error: mislocated background sign\n");
             return 0;
         }
 
