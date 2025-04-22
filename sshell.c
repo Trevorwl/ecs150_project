@@ -271,19 +271,13 @@ int main(void) {
         printf("sshell@ucd$ ");
         fflush(stdout);
 
-        getCmds(cmd);
+        bool goodInput = getCmds(cmd);
 
-        bool whiteSpace = false;
+        bool whiteSpace = strlen(commandLine) == 0 || isWhiteSpace(commandLine);
 
-        if(strlen(commandLine) == 0 || isWhiteSpace(commandLine)){
-           whiteSpace = true;
-        }
-
-        if(whiteSpace == false){
+        if(whiteSpace == false && goodInput == true){
 
             struct cmd* currentCmd = cmd;
-            bool goodInput = true;
-
 
             do{
 
@@ -296,9 +290,10 @@ int main(void) {
 
             } while(currentCmd != NULL);
 
-            if(goodInput == false){
-                continue;
-            }
+        }
+
+        if(goodInput == false){
+           continue;
         }
 
         struct pidSet* taskPids = NULL;

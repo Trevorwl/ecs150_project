@@ -62,7 +62,7 @@ void cmdDestructor(struct cmd* cmd);
  * Params: cmd->shell input
  *
  */
-void getCmds(struct cmd* cmd);
+int getCmds(struct cmd* cmd);
 
 /*
  * The shell input is tokenized and converted into

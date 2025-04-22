@@ -89,8 +89,11 @@ void cmdDestructor(struct cmd* cmd){
  *
  * Params: cmd->shell input
  *
+ *
+ * returns 0 if input is bad, 1 otherwise
+ *
  */
-void getCmds(struct cmd *cmd) {
+int getCmds(struct cmd *cmd) {
     char input[CMD_MAX_LENGTH + 1];
 
     if (!fgets(input, CMD_MAX_LENGTH, stdin)) {
@@ -115,12 +118,12 @@ void getCmds(struct cmd *cmd) {
     // —— ADD: detect missing command errors ——
     if (input[0] == '|' || input[0] == '>') {
         fprintf(stderr, "Error: missing command\n");
-        return;
+        return 0;
     }
-//    // Skip blank lines
-//    if (isWhiteSpace(input)) {
-//        return;
-//    }
+    // Skip blank lines
+    if (strlen(input)==0 || isWhiteSpace(input)) {
+        return 1;
+    }
 
     // Change all pipe characters | to '\0'
     // and then return the segmentation coordinate array
@@ -142,6 +145,8 @@ void getCmds(struct cmd *cmd) {
         }
     }
     free(offsets);
+
+    return 1;
 }
 
 /*
@@ -149,16 +154,17 @@ void getCmds(struct cmd *cmd) {
  * arguments.
  *
  * Params: cmd->the shell input
- * Returns: 1 if input is adequate length, 0 otherwise
  *
- * Throws: Error if command line has too many arguments
+ * Returns: 1 if input is good, 0 otherwise
+ *
+ * throws: error if input is bad
  */
 int parseArgs(struct cmd *cmd) {
     cmd->length = strlen(cmd->input);
     strcpy(cmd->argString, cmd->input);
     cmd->argString[strlen(cmd->argString)] = ' ';
     cmd->argString[strlen(cmd->argString)+1] = '\0';
-    cmd->is_background = 0;
+
     char **args = cmd->args;
 
     //  detect background '&'
@@ -167,7 +173,7 @@ int parseArgs(struct cmd *cmd) {
         if (bg) {
             char *p = bg + 1;
             while (*p == ' ') p++;
-            if (*p != '\0') {
+            if (*p != '\0' || cmd->isLast!=1) {
                 fprintf(stderr, "Error: mislocated background sign\n");
                 return 0;
             }
