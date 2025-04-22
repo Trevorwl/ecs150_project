@@ -38,8 +38,8 @@ struct cmd{
     int hasOutput;
     int hasInput;
 
-    int isLast;//
-    int isFirst;//
+    int isLast;
+    int isFirst;
 
 };
 

@@ -192,6 +192,8 @@ struct pidSet* runTasks(struct cmd* cmd){
              if(currentCmd->hasOutput){
                  int outFD = open(
                            currentCmd->out_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+
                  dup2(outFD,STDOUT_FILENO);
                  close(outFD);
              }
@@ -199,6 +201,12 @@ struct pidSet* runTasks(struct cmd* cmd){
              if(currentCmd->hasInput){
                 int inFD = open(
                           currentCmd->in_file, O_RDONLY);
+
+                if(inFD==-1){
+                     perror("open");
+                     exit(EXIT_FAILURE);
+                 }
+
                 dup2(inFD,STDIN_FILENO);
                 close(inFD);
             }
