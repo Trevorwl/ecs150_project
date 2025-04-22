@@ -34,6 +34,7 @@ int *parseInput(char *input) {
         *now = '\0';
         // 记录下偏移量
         res[pos++] = now - input + 1;
+
         if (now + 1 != NULL)
             now = strchr(now + 1, '|');
     }

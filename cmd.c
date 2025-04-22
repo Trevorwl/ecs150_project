@@ -172,7 +172,7 @@ int parseArgs(struct cmd *cmd) {
     {
         char *bg = strchr(cmd->argString, '&');
 
-        if(bg && cmd->isLast != 1){
+        if(bg && cmd->isLast ==0){
             fprintf(stderr, "Error: mislocated background sign\n");
             return 0;
         }
@@ -192,6 +192,7 @@ int parseArgs(struct cmd *cmd) {
     // detect > <
     char* outputRedirect = strchr(cmd->argString, '>');
     if (outputRedirect) {
+
         if(cmd->isLast==0) {
             fprintf(stderr, "Error: mislocated output redirection\n");
             fflush(stderr);
@@ -257,7 +258,7 @@ int parseArgs(struct cmd *cmd) {
     }
 
     args[count] = NULL;
-    cmd->numberOfArgs = count - 1;
+    cmd->numberOfArgs = count;
 
     return 1;
 }

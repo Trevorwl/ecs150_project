@@ -288,7 +288,7 @@ int main(void) {
 
             do{
 
-                if(parseArgs(cmd)==0){
+                if(parseArgs(currentCmd)==0){
                    parsingErrors = true;
                    break;
                 }

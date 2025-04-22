@@ -1,3 +1,5 @@
 .DS_Store
 obj
 sshell
+inputfile.txt
+outputfile.txt
