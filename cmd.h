@@ -5,6 +5,8 @@
 
 #include "sshell.h"
 
+extern char commandLine[CMD_MAX_LENGTH + 1];
+
 /*
  * This object holds information for command input that
  * is processed in the shell routine
@@ -33,12 +35,19 @@ struct cmd{
     char out_file[FILE_NAME_MAX];
     int is_background;
 
+    int hasOutput;
+    int hasInput;
+
     int isLast;
     int isFirst;
 
 };
 
 struct cmd* cmdConstructor();
+
+void resetCmd(struct cmd* cmd);
+
+void cmdDestructor(struct cmd* cmd);
 
 /*
  * Retrieves shell entry from command prompt
