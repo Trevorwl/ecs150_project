@@ -26,6 +26,7 @@ struct cmd *cmdConstructor() {
     cmd->hasOutput=0;
     cmd->hasInput=0;
 
+
     return cmd;
 }
 
@@ -110,6 +111,20 @@ void getCmds(struct cmd *cmd) {
     strcpy(commandLine, input);
 
     // 把所有的 管道符 | 都改成 '\0', 然后返回分割坐标数组
+
+    // —— ADD: detect missing command errors ——
+    if (input[0] == '|' || input[0] == '>') {
+        fprintf(stderr, "Error: missing command\n");
+        return;
+    }
+//    // Skip blank lines
+//    if (isWhiteSpace(input)) {
+//        return;
+//    }
+
+    // Change all pipe characters | to '\0'
+    // and then return the segmentation coordinate array
+
     int *offsets = parseInput(input);
     int pos = 0;
     struct cmd *now = cmd;
@@ -143,8 +158,23 @@ int parseArgs(struct cmd *cmd) {
     strcpy(cmd->argString, cmd->input);
     cmd->argString[strlen(cmd->argString)] = ' ';
     cmd->argString[strlen(cmd->argString)+1] = '\0';
+    cmd->is_background = 0;
     char **args = cmd->args;
 
+    //  detect background '&'
+    {
+        char *bg = strchr(cmd->argString, '&');
+        if (bg) {
+            char *p = bg + 1;
+            while (*p == ' ') p++;
+            if (*p != '\0') {
+                fprintf(stderr, "Error: mislocated background sign\n");
+                return 0;
+            }
+            cmd->is_background = 1;
+            *bg = ' ';  // remove '&'
+        }
+    }
 
     // detect > <
     char* outputRedirect = strchr(cmd->argString, '>');
