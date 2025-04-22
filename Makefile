@@ -5,7 +5,7 @@ CFLAGS = -Wall -Werror -MMD -MP -g
 
 
 OBJDIR = obj
-OBJS = $(OBJDIR)/sshell.o $(OBJDIR)/cmd.o $(OBJDIR)/utils.o
+OBJS = $(OBJDIR)/sshell.o $(OBJDIR)/cmd.o $(OBJDIR)/utils.o $(OBJDIR)/pidSet.o
 
 
 #Create names for .d files
