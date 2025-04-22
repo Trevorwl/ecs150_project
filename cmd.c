@@ -14,6 +14,8 @@ struct cmd *cmdConstructor() {
         exit(1);
     }
 
+    memset(cmd, 0, sizeof(struct cmd));
+
     cmd->length = 0;
     cmd->numberOfArgs = 0;
     cmd->isLast = 0;
