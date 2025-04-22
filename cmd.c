@@ -170,10 +170,16 @@ int parseArgs(struct cmd *cmd) {
     //  detect background '&'
     {
         char *bg = strchr(cmd->argString, '&');
+
+        if(bg && cmd->isLast != 1){
+            fprintf(stderr, "Error: mislocated background sign\n");
+            return 0;
+        }
+
         if (bg) {
             char *p = bg + 1;
             while (*p == ' ') p++;
-            if (*p != '\0' || cmd->isLast!=1) {
+            if (*p != '\0') {
                 fprintf(stderr, "Error: mislocated background sign\n");
                 return 0;
             }
