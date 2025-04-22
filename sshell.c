@@ -187,7 +187,7 @@ struct pidSet* runTasks(struct cmd* cmd){
                      perror("dup2");
                      exit(EXIT_FAILURE);
                  }
-             }S
+             }
 
              if(currentCmd->hasOutput){
                  int outFD = open(

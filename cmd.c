@@ -113,16 +113,17 @@ int getCmds(struct cmd *cmd) {
 
     strcpy(commandLine, input);
 
+    // Skip blank lines
+    if (strlen(input)==0 || isWhiteSpace(input)) {
+        return 1;
+    }
+
     // 把所有的 管道符 | 都改成 '\0', 然后返回分割坐标数组
 
     // —— ADD: detect missing command errors ——
     if (input[0] == '|' || input[0] == '>') {
         fprintf(stderr, "Error: missing command\n");
         return 0;
-    }
-    // Skip blank lines
-    if (strlen(input)==0 || isWhiteSpace(input)) {
-        return 1;
     }
 
     // Change all pipe characters | to '\0'
@@ -191,12 +192,13 @@ int parseArgs(struct cmd *cmd) {
     // detect > <
     char* outputRedirect = strchr(cmd->argString, '>');
     if (outputRedirect) {
-        *outputRedirect = ' ';
         if(cmd->isLast==0) {
             fprintf(stderr, "Error: mislocated output redirection\n");
             fflush(stderr);
             return 0;
         }
+
+        *outputRedirect = ' ';
         // find output file
         char * ptr = outputRedirect+1;
         if(ptr && *ptr==' ') ptr++;
@@ -216,12 +218,14 @@ int parseArgs(struct cmd *cmd) {
 
     char* inputRedirect = strchr(cmd->argString, '<');
     if(inputRedirect) {
-        *inputRedirect = ' ';
         if(cmd->isFirst==0) {
             fprintf(stderr, "Error: mislocated input redirection\n");
             fflush(stderr);
             return 0;
         }
+
+        *inputRedirect = ' ';
+
         // find input file
         char * ptr = inputRedirect+1;
         if(ptr && *ptr==' ') ptr++;

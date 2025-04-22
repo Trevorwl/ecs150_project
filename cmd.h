@@ -14,10 +14,10 @@ extern char commandLine[CMD_MAX_LENGTH + 1];
 struct cmd{
 
     /* input typed into terminal*/
-    char input[CMD_MAX_LENGTH];
+    char input[CMD_MAX_LENGTH];//
 
     /*length of input*/
-    int length;
+    int length;//
 
     /*Arguments parsed from input. args[0] is the command*/
     char* args[MAX_ARG_LENGTH + 1];
@@ -29,7 +29,7 @@ struct cmd{
     int numberOfArgs;
 
     /* pointer to next cmd */
-    struct cmd * next;
+    struct cmd * next;//
 
     char in_file[FILE_NAME_MAX];
     char out_file[FILE_NAME_MAX];
@@ -38,8 +38,8 @@ struct cmd{
     int hasOutput;
     int hasInput;
 
-    int isLast;
-    int isFirst;
+    int isLast;//
+    int isFirst;//
 
 };
 
