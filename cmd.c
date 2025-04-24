@@ -55,6 +55,28 @@ void resetCmd(struct cmd* cmd){
     for(int i = numberOfcmds - 1; i >= 1; i--){
         allCmds[i]->next = NULL;
         free(allCmds[i]);
+
+        memset(cmd->input, 0, CMD_MAX_LENGTH);
+        cmd->length = 0;
+        
+        //  Reset the fields of the first cmd struct
+        memset(cmd->argString, 0, CMD_MAX_LENGTH + 1);
+        for(int i = 0; i < MAX_ARG_LENGTH + 1; i++) {
+            cmd->args[i] = NULL;
+        }
+        cmd->numberOfArgs = 0;
+
+        cmd->next = NULL;
+
+        memset(cmd->in_file, 0, FILE_NAME_MAX);
+        memset(cmd->out_file, 0, FILE_NAME_MAX);
+
+        cmd->is_background = 0;
+        cmd->hasOutput = 0;
+        cmd->hasInput = 0;
+
+        cmd->isLast = 0;
+        cmd->isFirst = 0;
     }
 //
 //    // Explicitly reset the main cmd struct clearly and completely
@@ -128,7 +150,7 @@ int getCmds(struct cmd *cmd) {
         return 1;
     }
 
-    // 把所有的 管道符 | 都改成 '\0', 然后返回分割坐标数组
+
 
     // —— ADD: detect missing command errors ——
     if (input[0] == '|' || input[0] == '>') {
